@@ -15,6 +15,8 @@ public class DomicilioDaoH2 implements IDao<Domicilio> {
     private static Logger LOGGER = LoggerFactory.getLogger(DomicilioDaoH2.class);
     private static String SQL_INSERT = "INSERT INTO DOMICILIOS VALUES (DEFAULT, ?, ?, ?, ?) ";
     private static String SQL_SELECT_ID = "SELECT * FROM DOMICILIOS WHERE ID = ? ";
+    private static String SQL_UPDATE = "UPDATE DOMICILIOS SET CALLE = ?, NUMERO = ?, LOCALIDAD = ?, PROVINCIA = ? WHERE ID = ? ";
+    private static String SQL_DELETE = "DELETE FROM DOMICILIOS WHERE ID = ? ";
     @Override
     public Domicilio registrar(Domicilio domicilio) {
         Connection connection = null;
@@ -105,5 +107,84 @@ public class DomicilioDaoH2 implements IDao<Domicilio> {
     @Override
     public List<Domicilio> buscarTodos() {
         return null;
+    }
+
+    @Override
+    public Domicilio actualizar(Domicilio domicilio) {
+        Connection connection = null;
+        Domicilio domicilioActualizado = null;
+        try {
+            connection = H2Connection.getConnection();
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_UPDATE);
+            preparedStatement.setString(1, domicilio.getCalle());
+            preparedStatement.setInt(2, domicilio.getNumero());
+            preparedStatement.setString(3, domicilio.getLocalidad());
+            preparedStatement.setString(4, domicilio.getProvincia());
+            preparedStatement.setInt(5, domicilio.getId());
+            preparedStatement.executeUpdate();
+
+            LOGGER.info("Domicilio actualizado: " + domicilioActualizado);
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        return domicilioActualizado;
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        Connection connection = null;
+        try {
+            connection = H2Connection.getConnection();
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE);
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+
+            LOGGER.info("Domicilio eliminado con ID: " + id);
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -20,6 +20,8 @@ public class PacienteDaoH2 implements IDao<Paciente> {
     private static String SQL_INSERT = "INSERT INTO PACIENTES VALUES (DEFAULT, ?, ?, ?, ?, ?) ";
     private static String SQL_SELECT_ID = "SELECT * FROM PACIENTES WHERE ID = ? ";
     private static String SQL_SELECT_ALL = "SELECT * FROM PACIENTES ";
+    private static String SQL_UPDATE = "UPDATE PACIENTES SET APELLIDO = ?, NOMBRE = ?, DNI = ?, FECHA_INGRESO = ?, ID_DOMICILIO = ? WHERE ID = ? ";
+    private static String SQL_DELETE = "DELETE FROM PACIENTES WHERE ID = ? ";
     @Override
     public Paciente registrar(Paciente paciente) {
         Connection connection = null;
@@ -51,24 +53,24 @@ public class PacienteDaoH2 implements IDao<Paciente> {
             connection.commit();
             connection.setAutoCommit(true);
         } catch (Exception e) {
-        if (connection != null) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                LOGGER.error(ex.getMessage());
-                ex.printStackTrace();
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
-        }
-        LOGGER.error(e.getMessage());
-        e.printStackTrace();
-    } finally {
-        try {
-            connection.close();
-        } catch (SQLException e) {
             LOGGER.error(e.getMessage());
             e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
         }
-    }
         return pacienteRegistrado;
     }
 
@@ -148,5 +150,87 @@ public class PacienteDaoH2 implements IDao<Paciente> {
         }
 
         return pacientesEncontrados;
+    }
+
+    @Override
+    public Paciente actualizar(Paciente paciente) {
+        Connection connection = null;
+        DomicilioDaoH2 domicilioDaoH2 = new DomicilioDaoH2();
+        Paciente pacienteActualizado = null;
+        try {
+            connection = H2Connection.getConnection();
+            connection.setAutoCommit(false);
+
+            domicilioDaoH2.actualizar(paciente.getDomicilio());
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_UPDATE);
+            preparedStatement.setString(1, paciente.getApellido());
+            preparedStatement.setString(2, paciente.getNombre());
+            preparedStatement.setString(3, paciente.getDni());
+            preparedStatement.setDate(4, Date.valueOf(paciente.getFechaIngreso()));
+            preparedStatement.setInt(5, paciente.getDomicilio().getId());
+            preparedStatement.setInt(6, paciente.getId());
+            preparedStatement.executeUpdate();
+
+            LOGGER.info("Paciente actualizado: " + pacienteActualizado);
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return pacienteActualizado;
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        Connection connection = null;
+        try {
+            connection = H2Connection.getConnection();
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE);
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+
+            LOGGER.info("Paciente eliminado con ID: " + id);
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }

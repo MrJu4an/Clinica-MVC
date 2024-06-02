@@ -4,6 +4,7 @@ package dh.backend.clinicamvc.service.impl;
 import dh.backend.clinicamvc.dao.IDao;
 import dh.backend.clinicamvc.model.Odontologo;
 import dh.backend.clinicamvc.service.IOdontologoService;
+import dh.backend.clinicamvc.service.IPacienteService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,5 +27,15 @@ public class OdontologoService implements IOdontologoService {
 
     public List<Odontologo> buscarTodos() {
         return odontologoIDao.buscarTodos();
+    }
+
+    @Override
+    public Odontologo actualizarOdontologo(Odontologo odontologo) {
+        return odontologoIDao.actualizar(odontologo);
+    }
+
+    @Override
+    public void eliminarOdontologo(Integer id) {
+        odontologoIDao.eliminar(id);
     }
 }

@@ -6,4 +6,8 @@ public interface IDao <T> {
     T registrar(T t);
     T buscarPorId(Integer id);
     List<T> buscarTodos();
+
+    T actualizar(T t);
+
+    void eliminar(Integer id);
 }

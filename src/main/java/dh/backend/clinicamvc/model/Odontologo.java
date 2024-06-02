@@ -6,6 +6,10 @@ public class Odontologo {
     private String nombre;
     private String apellido;
 
+    public Odontologo() {
+
+    }
+
     public Odontologo(Integer id, String idMatricula, String nombre, String apellido) {
         this.id = id;
         this.idMatricula = idMatricula;
