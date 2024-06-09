@@ -1,54 +1,53 @@
 package dh.backend.clinicamvc.service;
 
-import dh.backend.clinicamvc.dao.impl.PacienteDaoH2;
-import dh.backend.clinicamvc.model.Domicilio;
-import dh.backend.clinicamvc.model.Paciente;
+import dh.backend.clinicamvc.entity.Domicilio;
+import dh.backend.clinicamvc.entity.Paciente;
 import dh.backend.clinicamvc.service.impl.PacienteService;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SpringBootTest
 class PacienteServiceTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PacienteServiceTest.class);
-    private static PacienteService pacienteService = new PacienteService(new PacienteDaoH2());
+    @Autowired
+    private PacienteService pacienteService;
+    private Paciente paciente;
 
-    @BeforeAll
-    static void crearTablas() {
-        Connection connection = null;
-        try {
-            Class.forName("org.h2.Driver");
-            connection = DriverManager.getConnection("jdbc:h2:~/db_clinicamvc_2805;INIT=RUNSCRIPT FROM 'create.sql'", "sa", "sa");
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error(e.getMessage());
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                LOGGER.error(e.getMessage());
-                e.printStackTrace();
-            }
-        }
+    @BeforeEach
+    void setUp() {
+        paciente = new Paciente();
+        paciente.setNombre("Menganito");
+        paciente.setApellido("Cosme");
+        paciente.setDni("464646");
+        paciente.setFechaIngreso(LocalDate.of(2024, 01, 12));
+        Domicilio domicilio = new Domicilio();
+        domicilio.setCalle("Calle falsa");
+        domicilio.setNumero(456);
+        domicilio.setProvincia("Sprinfield");
+        domicilio.setLocalidad("Montana");
+        paciente.setDomicilio(domicilio);
     }
 
     @Test
     @DisplayName("Testear que un paciente fue guardado")
     void testPacienteGuardado() {
-        Paciente paciente = new Paciente("Rondon", "Sebastian", "1005753422",
-                LocalDate.of(2024, 03, 02),
-                new Domicilio("Calle Falsa", 456, "SpringField", "Montana"));
-
         Paciente pacienteDB = pacienteService.registrarPaciente(paciente);
 
         assertNotNull(pacienteDB);
@@ -58,20 +57,17 @@ class PacienteServiceTest {
     @DisplayName("Testear busqueda de Paciente por ID")
     void testBuscarPaciente() {
         Integer id = 1;
-        Paciente pacienteEncontrado = pacienteService.buscarPorId(id);
+        Optional<Paciente> pacienteEncontrado = pacienteService.buscarPorId(id);
+        Paciente paciente1 = pacienteEncontrado.get();
 
-        assertNotNull(pacienteEncontrado);
+        assertEquals(id, paciente1.getId());
     }
 
     @Test
     @DisplayName("Buscar todos los pacientes")
     void testBuscarPacientes() {
-        Paciente paciente = new Paciente("Rondon", "Sebastian", "1005753422",
-                LocalDate.of(2024, 03, 02),
-                new Domicilio("Calle Falsa", 456, "SpringField", "Montana"));
 
         pacienteService.registrarPaciente(paciente);
-
         List<Paciente> pacientesEncontrados = pacienteService.buscarTodos();
 
         assertNotNull(pacientesEncontrados);

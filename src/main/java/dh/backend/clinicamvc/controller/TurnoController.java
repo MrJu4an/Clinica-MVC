@@ -1,13 +1,15 @@
 package dh.backend.clinicamvc.controller;
 
-import dh.backend.clinicamvc.model.Turno;
+import dh.backend.clinicamvc.Dto.request.TurnoRequestDto;
+import dh.backend.clinicamvc.Dto.response.TurnoResponseDto;
+import dh.backend.clinicamvc.entity.Turno;
 import dh.backend.clinicamvc.service.ITurnoService;
-import dh.backend.clinicamvc.service.impl.TurnoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/turno")
@@ -19,8 +21,8 @@ public class TurnoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Turno> buscarTurno(@PathVariable Integer id) {
-        Turno turno = turnoService.buscarPorId(id);
+    public ResponseEntity<TurnoResponseDto> buscarTurno(@PathVariable Integer id) {
+        TurnoResponseDto turno = turnoService.buscarPorId(id);
         if (turno != null) {
             return ResponseEntity.ok(turno);
         } else {
@@ -29,13 +31,13 @@ public class TurnoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Turno>> buscarTodos() {
+    public ResponseEntity<List<TurnoResponseDto>> buscarTodos() {
         return ResponseEntity.ok(turnoService.buscarTodos());
     }
 
     @PostMapping
-    public ResponseEntity<Turno> registrarTurno(@RequestBody Turno turno) {
-        Turno turnoRetornar = turnoService.registrarTurno(turno);
+    public ResponseEntity<TurnoResponseDto> registrarTurno(@RequestBody TurnoRequestDto turno) {
+        TurnoResponseDto turnoRetornar = turnoService.registrarTurno(turno);
         if (turnoRetornar != null) {
             return ResponseEntity.status(HttpStatus.CREATED).body(turnoRetornar);
         } else {
@@ -43,9 +45,9 @@ public class TurnoController {
         }
     }
 
-    @PutMapping
-    public ResponseEntity<String> actualizarTurno(@RequestBody Turno turno) {
-        turnoService.actualizarTurno(turno);
+    @PutMapping("/{id}")
+    public ResponseEntity<String> actualizarTurno(@PathVariable Integer id, @RequestBody TurnoRequestDto turno) {
+        turnoService.actualizarTurno(id, turno);
         return ResponseEntity.ok("Turno actualizado");
     }
 
