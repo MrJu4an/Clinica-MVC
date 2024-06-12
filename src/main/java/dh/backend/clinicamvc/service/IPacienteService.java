@@ -15,4 +15,10 @@ public interface IPacienteService {
     void actualizarPaciente(Paciente paciente);
 
     void eliminarPaciente(Integer id);
+
+    // Metodos con HQL
+    Paciente buscarPorDNI(String dni);
+    List<Paciente> buscarPorProvincia(String provincia);
+
+
 }

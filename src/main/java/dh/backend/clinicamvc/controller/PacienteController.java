@@ -63,4 +63,19 @@ public class PacienteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    @GetMapping("/dni/{dni}")
+    public ResponseEntity<Paciente> buscarPacienteDNI(@PathVariable String dni) {
+        Paciente pacienteOptional = pacienteService.buscarPorDNI(dni);
+        if (pacienteOptional != null) {
+            return ResponseEntity.ok(pacienteOptional);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/domicilio/{provincia}")
+    public ResponseEntity<List<Paciente>> buscarPorDomicilio(@PathVariable String provincia) {
+        return ResponseEntity.ok(pacienteService.buscarPorProvincia(provincia));
+    }
 }

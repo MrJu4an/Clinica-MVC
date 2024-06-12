@@ -2,6 +2,9 @@ package dh.backend.clinicamvc.controller;
 
 import dh.backend.clinicamvc.entity.Odontologo;
 import dh.backend.clinicamvc.service.IOdontologoService;
+import dh.backend.clinicamvc.service.impl.OdontologoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,5 +68,20 @@ public class OdontologoController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/apellido/{apellido}")
+    public ResponseEntity<List<Odontologo>> buscarPorApellido(@PathVariable String apellido) {
+        List<Odontologo> listaOdontologos = odontologoService.buscarPorApellido(apellido);
+        if (listaOdontologos.size() > 0){
+            return ResponseEntity.ok(odontologoService.buscarPorApellido(apellido));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<List<Odontologo>> buscarTodos(@PathVariable String nombre) {
+        return ResponseEntity.ok(odontologoService.buscarPorNombre(nombre));
     }
 }

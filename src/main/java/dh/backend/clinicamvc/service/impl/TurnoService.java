@@ -12,6 +12,8 @@ import dh.backend.clinicamvc.service.IOdontologoService;
 import dh.backend.clinicamvc.service.IPacienteService;
 import dh.backend.clinicamvc.service.ITurnoService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 @Service
 public class TurnoService implements ITurnoService {
+    private Logger LOGGER = LoggerFactory.getLogger(TurnoService.class);
     private ITurnoRepository turnoRepository;
     private IPacienteService pacienteService;
     private IOdontologoService odontologoService;
@@ -50,6 +53,7 @@ public class TurnoService implements ITurnoService {
             turnoRegistrar.setOdontologo(odontologo.get());
             turnoRegistrar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             turnoGuardado = turnoRepository.save(turnoRegistrar);
+            LOGGER.info("Se guarda el turno: " + turnoGuardado);
 
             //Armamos el turno a devolver
             turnoDevolver = mapToResponseDto(turnoGuardado);
@@ -63,8 +67,10 @@ public class TurnoService implements ITurnoService {
         if (turnoOptional.isPresent()) {
             Turno turnoEncontrado = turnoOptional.get();
             TurnoResponseDto turnoDevolver = mapToResponseDto(turnoEncontrado);
+            LOGGER.info("Se retorna el turno encontrado: " + turnoDevolver);
             return turnoDevolver;
         }
+        LOGGER.info("No se encontro turnos con el id: " + id);
         return null;
     }
 
@@ -77,6 +83,7 @@ public class TurnoService implements ITurnoService {
             turnoAuxiliar = mapToResponseDto(turno);
             turnosDevolver.add(turnoAuxiliar);
         }
+        LOGGER.info("Se retorna todos los turnos: " + turnosDevolver);
         return turnosDevolver;
     }
 
@@ -98,13 +105,41 @@ public class TurnoService implements ITurnoService {
             turnoModificar.setPaciente(paciente.get());
             turnoModificar.setOdontologo(odontologo.get());
             turnoModificar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
+            LOGGER.info("Se actualiza la información del turno: " + turnoModificar);
             turnoRepository.save(turnoModificar);
         }
     }
 
     @Override
     public void eliminarTurno(Integer id) {
+        LOGGER.info("Se elimina el turno con id: " + id);
         turnoRepository.deleteById(id);
+    }
+
+    @Override
+    public List<TurnoResponseDto> buscarPorFechas(LocalDate startDate, LocalDate endDate) {
+        List<Turno> listadoTurnos = turnoRepository.buscarTurnosPorFecha(startDate, endDate);
+        List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
+        TurnoResponseDto turnoAuxiliar = null;
+        for (Turno turno: listadoTurnos) {
+            turnoAuxiliar = mapToResponseDto(turno);
+            listadoRetornar.add(turnoAuxiliar);
+        }
+        LOGGER.info("Se retorna los turnos buscado por el rango de fechas: " + listadoRetornar);
+        return listadoRetornar;
+    }
+
+    @Override
+    public List<TurnoResponseDto> buscarMayorFechaActual() {
+        List<Turno> listadoTurnos = turnoRepository.buscarTurnosMayoresFecha();
+        List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
+        TurnoResponseDto turnoAuxiliar = null;
+        for (Turno turno: listadoTurnos) {
+            turnoAuxiliar = mapToResponseDto(turno);
+            listadoRetornar.add(turnoAuxiliar);
+        }
+        LOGGER.info("Se retorna los turnos con fecha mayor a la actual: " + listadoRetornar);
+        return listadoRetornar;
     }
 
     private TurnoResponseDto mapToResponseDto(Turno turno) {

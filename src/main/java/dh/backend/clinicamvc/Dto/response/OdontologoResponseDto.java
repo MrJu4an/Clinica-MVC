@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 public class OdontologoResponseDto {
     private Integer id;
-    private String nroMatricula;
+    private String idMatricula;
     private String nombre;
     private String apellido;
 }
