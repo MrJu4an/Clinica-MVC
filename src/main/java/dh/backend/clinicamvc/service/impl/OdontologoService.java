@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.service.impl;
 
 import dh.backend.clinicamvc.entity.Odontologo;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.repository.IOdontologoRepository;
 import dh.backend.clinicamvc.service.IOdontologoService;
 import org.slf4j.Logger;
@@ -35,15 +36,28 @@ public class OdontologoService implements IOdontologoService {
     }
 
     @Override
-    public void actualizarOdontologo(Odontologo odontologo) {
-        LOGGER.info("Se actualiza el odontologo: " + odontologo);
-        odontologoRepository.save(odontologo);
+    public void actualizarOdontologo(Odontologo odontologo) throws ResourceNotFoundException {
+        Optional<Odontologo> odontologoOptional = buscarPorId(odontologo.getId());
+        if (odontologoOptional.isPresent()) {
+            LOGGER.info("Se actualiza el odontologo: " + odontologo);
+            odontologoRepository.save(odontologo);
+        } else {
+            LOGGER.info("Odontologo no encontrado: " + odontologo);
+            throw new ResourceNotFoundException("{\"message\": \"odontologo no encontrado\"}");
+        }
+
     }
 
     @Override
-    public void eliminarOdontologo(Integer id) {
-        LOGGER.info("Se elimina el odontologo con id: " + id);
-        odontologoRepository.deleteById(id);
+    public void eliminarOdontologo(Integer id) throws ResourceNotFoundException {
+        Optional<Odontologo> odontologoOptional = buscarPorId(id);
+        if (odontologoOptional.isPresent()) {
+            LOGGER.info("Se elimina el odontologo con id: " + id);
+            odontologoRepository.deleteById(id);
+        } else {
+            LOGGER.info("Odontologo no encontrado: " + id);
+            throw new ResourceNotFoundException("{\"message\": \"odontologo no encontrado\"}");
+        }
     }
 
     @Override

@@ -7,6 +7,8 @@ import dh.backend.clinicamvc.Dto.response.TurnoResponseDto;
 import dh.backend.clinicamvc.entity.Odontologo;
 import dh.backend.clinicamvc.entity.Paciente;
 import dh.backend.clinicamvc.entity.Turno;
+import dh.backend.clinicamvc.exception.BadRequestException;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.repository.ITurnoRepository;
 import dh.backend.clinicamvc.service.IOdontologoService;
 import dh.backend.clinicamvc.service.IPacienteService;
@@ -37,7 +39,7 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public TurnoResponseDto registrarTurno(TurnoRequestDto turnoRequestDto) {
+    public TurnoResponseDto registrarTurno(TurnoRequestDto turnoRequestDto) throws BadRequestException {
         //Buscamos el paciente y odontologo correspondientes
         Optional<Paciente> paciente = pacienteService.buscarPorId(turnoRequestDto.getPaciente_id());
         Optional<Odontologo> odontologo = odontologoService.buscarPorId(turnoRequestDto.getOdontologo_id());
@@ -53,12 +55,17 @@ public class TurnoService implements ITurnoService {
             turnoRegistrar.setOdontologo(odontologo.get());
             turnoRegistrar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             turnoGuardado = turnoRepository.save(turnoRegistrar);
-            LOGGER.info("Se guarda el turno: " + turnoGuardado);
+            LOGGER.info("Se guarda el turno");
+            //LOGGER.info("Se guarda el turno: " + turnoGuardado);
 
             //Armamos el turno a devolver
             turnoDevolver = mapToResponseDto(turnoGuardado);
+
+            return turnoDevolver;
+        } else {
+            LOGGER.info("Odontologo o paciente no encontrado: " + turnoRequestDto);
+            throw new BadRequestException("{\"message\": \"odontologo o paciente no encontrados\"}");
         }
-        return turnoDevolver;
     }
 
     @Override
@@ -96,8 +103,6 @@ public class TurnoService implements ITurnoService {
 
         //Variables a utilizar y devolver
         Turno turnoModificar = new Turno();
-        Turno turnoDevolver = null;
-        Turno turnoGuaradado = null;
 
         if (paciente.isPresent() && odontologo.isPresent()) {
             //Creamos el turno a guardar
@@ -111,9 +116,15 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public void eliminarTurno(Integer id) {
-        LOGGER.info("Se elimina el turno con id: " + id);
-        turnoRepository.deleteById(id);
+    public void eliminarTurno(Integer id) throws ResourceNotFoundException {
+        TurnoResponseDto turnoResponseDto = buscarPorId(id);
+        if (turnoResponseDto != null) {
+            LOGGER.info("Se elimina el turno con id: " + id);
+            turnoRepository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("{\"message\": \"turno no encontrado\"}");
+        }
+
     }
 
     @Override

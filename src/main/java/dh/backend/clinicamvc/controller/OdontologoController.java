@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.controller;
 
 import dh.backend.clinicamvc.entity.Odontologo;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.service.IOdontologoService;
 import dh.backend.clinicamvc.service.impl.OdontologoService;
 import org.slf4j.Logger;
@@ -49,31 +50,21 @@ public class OdontologoController {
     }
 
     @PutMapping
-    public ResponseEntity<String> actualizarOdontologo(@RequestBody Odontologo odontologo) {
-        Optional<Odontologo> odontologoOptional = odontologoService.buscarPorId(odontologo.getId());
-        if (odontologoOptional.isPresent()) {
-            odontologoService.actualizarOdontologo(odontologo);
-            return ResponseEntity.ok("{\"message\": \"odontologo modificado\"}");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<String> actualizarOdontologo(@RequestBody Odontologo odontologo) throws ResourceNotFoundException {
+        odontologoService.actualizarOdontologo(odontologo);
+        return ResponseEntity.ok("{\"message\": \"odontologo modificado\"}");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarOdontologo(@PathVariable Integer id) {
-        Optional<Odontologo> odontologoOptional = odontologoService.buscarPorId(id);
-        if (odontologoOptional.isPresent()) {
-            odontologoService.eliminarOdontologo(id);
-            return ResponseEntity.ok("{\"message\": \"odontologo eliminado\"}");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<String> eliminarOdontologo(@PathVariable Integer id) throws ResourceNotFoundException {
+        odontologoService.eliminarOdontologo(id);
+        return ResponseEntity.ok("{\"message\": \"odontologo eliminado\"}");
     }
 
     @GetMapping("/apellido/{apellido}")
     public ResponseEntity<List<Odontologo>> buscarPorApellido(@PathVariable String apellido) {
         List<Odontologo> listaOdontologos = odontologoService.buscarPorApellido(apellido);
-        if (listaOdontologos.size() > 0){
+        if (!listaOdontologos.isEmpty()){
             return ResponseEntity.ok(odontologoService.buscarPorApellido(apellido));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

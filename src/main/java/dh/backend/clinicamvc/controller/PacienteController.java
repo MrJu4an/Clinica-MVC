@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.controller;
 
 import dh.backend.clinicamvc.entity.Paciente;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.service.IPacienteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,23 +46,15 @@ public class PacienteController {
     }
 
     @PutMapping
-    public ResponseEntity<String> actualizarPaciente(@RequestBody Paciente paciente) {
-        Optional<Paciente> pacienteOptional = pacienteService.buscarPorId(paciente.getId());
-        if (pacienteOptional.isPresent()) {
-            return ResponseEntity.ok("{\"message\": \"paciente modificado\"}");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<String> actualizarPaciente(@RequestBody Paciente paciente) throws ResourceNotFoundException {
+        pacienteService.actualizarPaciente(paciente);
+        return ResponseEntity.ok("{\"message\": \"paciente modificado\"}");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarPaciente(@PathVariable Integer id) {
-        Optional<Paciente> pacienteOptional = pacienteService.buscarPorId(id);
-        if (pacienteOptional.isPresent()) {
-            return ResponseEntity.ok("{\"message\": \"paciente eliminado\"}");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<String> eliminarPaciente(@PathVariable Integer id) throws ResourceNotFoundException {
+        pacienteService.eliminarPaciente(id);
+        return ResponseEntity.ok("{\"message\": \"paciente eliminado\"}");
     }
 
     @GetMapping("/dni/{dni}")

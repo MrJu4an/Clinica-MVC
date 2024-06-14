@@ -1,10 +1,12 @@
 package dh.backend.clinicamvc.service.impl;
 
 import dh.backend.clinicamvc.entity.Paciente;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.repository.IPacienteRepository;
 import dh.backend.clinicamvc.service.IPacienteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,15 +37,28 @@ public class PacienteService implements IPacienteService {
     }
 
     @Override
-    public void actualizarPaciente(Paciente paciente) {
-        LOGGER.info("Se actualiza el paciente: " + paciente);
-        pacienteRepository.save(paciente);
+    public void actualizarPaciente(Paciente paciente) throws ResourceNotFoundException {
+        Optional<Paciente> pacienteOptional = buscarPorId(paciente.getId());
+        if (pacienteOptional.isPresent()) {
+            LOGGER.info("Se actualiza el paciente: " + paciente);
+            pacienteRepository.save(paciente);
+        } else {
+            LOGGER.info("No se encontro el paciente " + paciente);
+            throw new ResourceNotFoundException("{\"message\": \"paciente no encontrado\"}");
+        }
+
     }
 
     @Override
-    public void eliminarPaciente(Integer id) {
-        LOGGER.info("Se elimina el paciente con id: " + id);
-        pacienteRepository.deleteById(id);
+    public void eliminarPaciente(Integer id) throws ResourceNotFoundException {
+        Optional<Paciente> pacienteOptional = buscarPorId(id);
+        if (pacienteOptional.isPresent()) {
+            LOGGER.info("Se elimina el paciente con id: " + id);
+            pacienteRepository.deleteById(id);
+        } else {
+            LOGGER.info("No se encontro el paciente con id: " + id);
+            throw new ResourceNotFoundException("{\"message\": \"paciente no encontrado\"}");
+        }
     }
 
     @Override
