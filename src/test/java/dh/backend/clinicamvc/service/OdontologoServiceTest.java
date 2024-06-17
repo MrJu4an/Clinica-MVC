@@ -1,6 +1,8 @@
 package dh.backend.clinicamvc.service;
 
 import dh.backend.clinicamvc.entity.Odontologo;
+import dh.backend.clinicamvc.exception.BadRequestException;
+import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.service.impl.OdontologoService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +38,7 @@ class OdontologoServiceTest {
 
     @Test
     @DisplayName("Buscar todos los odontologos")
-    void testBuscarOdontologos() {
+    void testBuscarOdontologos() throws BadRequestException, ResourceNotFoundException {
         List<Odontologo> odontologos = new ArrayList<>();
 
         odontologoService.registrarOdontologo(odontologo);

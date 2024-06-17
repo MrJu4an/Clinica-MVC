@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.service.impl;
 
 import dh.backend.clinicamvc.entity.Odontologo;
+import dh.backend.clinicamvc.exception.BadRequestException;
 import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.repository.IOdontologoRepository;
 import dh.backend.clinicamvc.service.IOdontologoService;
@@ -20,19 +21,34 @@ public class OdontologoService implements IOdontologoService {
         this.odontologoRepository = odontologoRepository;
     }
 
-    public Odontologo registrarOdontologo(Odontologo odontologo) {
-        LOGGER.info("Se registra el odontologo: " + odontologo);
-        return odontologoRepository.save(odontologo);
+    public Optional<Odontologo> buscarPorId(Integer id) throws ResourceNotFoundException {
+        Optional<Odontologo> odontologoOptional = odontologoRepository.findById(id);
+        if (!odontologoOptional.isPresent()) {
+            LOGGER.info("Odontologo no encontrado");
+            throw new ResourceNotFoundException("{\"message\": \"odontologo no encontrado\"}");
+        }
+        LOGGER.info("Se encuentra el odontologo con id: " + id);
+        return odontologoOptional;
     }
 
-    public Optional<Odontologo> buscarPorId(Integer id) {
-        LOGGER.info("Se busca el odontologo con id: " + id);
-        return odontologoRepository.findById(id);
-    }
-
-    public List<Odontologo> buscarTodos() {
+    public List<Odontologo> buscarTodos() throws ResourceNotFoundException {
         LOGGER.info("Se busca todos los odontologos");
-        return odontologoRepository.findAll();
+        List<Odontologo> odontologos = odontologoRepository.findAll();
+        if (odontologos.isEmpty()) {
+            throw new ResourceNotFoundException("{\"message\": \"no existen odontologos\"}");
+        }
+        return odontologos;
+    }
+
+    public Odontologo registrarOdontologo(Odontologo odontologo) throws BadRequestException {
+        Odontologo odontologoRegistrar = odontologoRepository.save(odontologo);
+        if (odontologo != null) {
+            LOGGER.info("Se registra el odontologo: " + odontologo);
+            return odontologoRegistrar;
+        } else {
+            throw new BadRequestException("{\"message\": \"Error al crear odontologo, revise los datos enviados\"}");
+        }
+
     }
 
     @Override
@@ -61,14 +77,24 @@ public class OdontologoService implements IOdontologoService {
     }
 
     @Override
-    public List<Odontologo> buscarPorApellido(String apellido) {
+    public List<Odontologo> buscarPorApellido(String apellido) throws ResourceNotFoundException {
         LOGGER.info("Se busca los odontologos por apellido: " + apellido);
-        return odontologoRepository.buscarPorApellido(apellido);
+        List<Odontologo> odontologos = odontologoRepository.buscarPorApellido(apellido);
+        if (odontologos.isEmpty()) {
+            LOGGER.info("No existen odontologos");
+            throw new ResourceNotFoundException("{\"message\": \"odontologos no encontrados\"}");
+        }
+        return odontologos;
     }
 
     @Override
-    public List<Odontologo> buscarPorNombre(String nombre) {
+    public List<Odontologo> buscarPorNombre(String nombre) throws ResourceNotFoundException {
         LOGGER.info("Se busca los odontologos por nombre: " + nombre);
-        return odontologoRepository.buscarPorNombre(nombre);
+        List<Odontologo> odontologos = odontologoRepository.buscarPorNombre(nombre);
+        if (odontologos.isEmpty()) {
+            LOGGER.info("No existen odontologos");
+            throw new ResourceNotFoundException("{\"message\": \"odontologos no encontrados\"}");
+        }
+        return odontologos;
     }
 }

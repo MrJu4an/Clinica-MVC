@@ -26,28 +26,22 @@ public class TurnoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TurnoResponseDto> buscarTurno(@PathVariable Integer id) {
-        TurnoResponseDto turno = turnoService.buscarPorId(id);
-        if (turno != null) {
-            return ResponseEntity.ok(turno);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    public ResponseEntity<TurnoResponseDto> buscarTurno(@PathVariable Integer id) throws ResourceNotFoundException {
+        return ResponseEntity.ok(turnoService.buscarPorId(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<TurnoResponseDto>> buscarTodos() {
+    public ResponseEntity<List<TurnoResponseDto>> buscarTodos() throws ResourceNotFoundException {
         return ResponseEntity.ok(turnoService.buscarTodos());
     }
 
     @PostMapping
-    public ResponseEntity<TurnoResponseDto> registrarTurno(@RequestBody TurnoRequestDto turno) throws BadRequestException {
-        TurnoResponseDto turnoRetornar = turnoService.registrarTurno(turno);
-        return ResponseEntity.status(HttpStatus.CREATED).body(turnoRetornar);
+    public ResponseEntity<TurnoResponseDto> registrarTurno(@RequestBody TurnoRequestDto turno) throws BadRequestException, ResourceNotFoundException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(turnoService.registrarTurno(turno));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> actualizarTurno(@PathVariable Integer id, @RequestBody TurnoRequestDto turno) {
+    public ResponseEntity<String> actualizarTurno(@PathVariable Integer id, @RequestBody TurnoRequestDto turno) throws ResourceNotFoundException, BadRequestException {
         turnoService.actualizarTurno(id, turno);
         return ResponseEntity.ok("Turno actualizado");
     }
@@ -60,14 +54,14 @@ public class TurnoController {
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @GetMapping("/fechas/{inicio}/{fin}")
-    public ResponseEntity<List<TurnoResponseDto>> buscarPorFechas(@PathVariable String inicio, @PathVariable String fin) {
+    public ResponseEntity<List<TurnoResponseDto>> buscarPorFechas(@PathVariable String inicio, @PathVariable String fin) throws ResourceNotFoundException {
         LocalDate fechaInicio = LocalDate.parse(inicio, formatter);
         LocalDate fechaFinal = LocalDate.parse(fin, formatter);
         return ResponseEntity.ok(turnoService.buscarPorFechas(fechaInicio, fechaFinal));
     }
 
     @GetMapping("/fechaActual")
-    public ResponseEntity<List<TurnoResponseDto>> buscarMayorFechaActual() {
+    public ResponseEntity<List<TurnoResponseDto>> buscarMayorFechaActual() throws ResourceNotFoundException {
         return ResponseEntity.ok(turnoService.buscarMayorFechaActual());
     }
 }

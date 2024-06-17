@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.controller;
 
 import dh.backend.clinicamvc.entity.Odontologo;
+import dh.backend.clinicamvc.exception.BadRequestException;
 import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.service.IOdontologoService;
 import dh.backend.clinicamvc.service.impl.OdontologoService;
@@ -23,30 +24,18 @@ public class OdontologoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Odontologo> buscarOdontologo(@PathVariable Integer id) {
-        Optional<Odontologo> odontologo = odontologoService.buscarPorId(id);
-        if (odontologo.isPresent()) {
-            Odontologo odontologoRetornar = odontologo.get();
-            return ResponseEntity.ok(odontologoRetornar);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    public ResponseEntity<Odontologo> buscarOdontologo(@PathVariable Integer id) throws ResourceNotFoundException {
+        return ResponseEntity.ok(odontologoService.buscarPorId(id).get());
     }
 
     @GetMapping
-    public ResponseEntity<List<Odontologo>> buscarTodos() {
-        List<Odontologo> odontologos = odontologoService.buscarTodos();
-        return ResponseEntity.ok(odontologos);
+    public ResponseEntity<List<Odontologo>> buscarTodos() throws ResourceNotFoundException {
+        return ResponseEntity.ok(odontologoService.buscarTodos());
     }
 
     @PostMapping
-    public ResponseEntity<Odontologo> registrarOdontologo(@RequestBody Odontologo odontologo) {
-        Odontologo odontologoRetornar = odontologoService.registrarOdontologo(odontologo);
-        if (odontologoRetornar != null) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(odontologoRetornar);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    public ResponseEntity<Odontologo> registrarOdontologo(@RequestBody Odontologo odontologo) throws BadRequestException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(odontologoService.registrarOdontologo(odontologo));
     }
 
     @PutMapping
@@ -62,17 +51,12 @@ public class OdontologoController {
     }
 
     @GetMapping("/apellido/{apellido}")
-    public ResponseEntity<List<Odontologo>> buscarPorApellido(@PathVariable String apellido) {
-        List<Odontologo> listaOdontologos = odontologoService.buscarPorApellido(apellido);
-        if (!listaOdontologos.isEmpty()){
-            return ResponseEntity.ok(odontologoService.buscarPorApellido(apellido));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<List<Odontologo>> buscarPorApellido(@PathVariable String apellido) throws ResourceNotFoundException {
+        return ResponseEntity.ok(odontologoService.buscarPorApellido(apellido));
     }
 
     @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<List<Odontologo>> buscarTodos(@PathVariable String nombre) {
+    public ResponseEntity<List<Odontologo>> buscarTodos(@PathVariable String nombre) throws ResourceNotFoundException {
         return ResponseEntity.ok(odontologoService.buscarPorNombre(nombre));
     }
 }

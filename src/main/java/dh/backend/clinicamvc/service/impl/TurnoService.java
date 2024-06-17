@@ -39,7 +39,38 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public TurnoResponseDto registrarTurno(TurnoRequestDto turnoRequestDto) throws BadRequestException {
+    public TurnoResponseDto buscarPorId(Integer id) throws ResourceNotFoundException {
+        Optional<Turno> turnoOptional = turnoRepository.findById(id);
+        if (turnoOptional.isPresent()) {
+            Turno turnoEncontrado = turnoOptional.get();
+            TurnoResponseDto turnoDevolver = mapToResponseDto(turnoEncontrado);
+            LOGGER.info("Se retorna el turno encontrado: " + turnoDevolver);
+            return turnoDevolver;
+        } else {
+            LOGGER.info("Turno no encontrado");
+            throw new ResourceNotFoundException("{\"message\": \"turno no encontrado\"}");
+        }
+    }
+
+    @Override
+    public List<TurnoResponseDto> buscarTodos() throws ResourceNotFoundException {
+        List<Turno> turnos = turnoRepository.findAll();
+        if (!turnos.isEmpty()) {
+            List<TurnoResponseDto> turnosDevolver = new ArrayList<>();
+            TurnoResponseDto turnoAuxiliar = null;
+            for (Turno turno : turnos) {
+                turnoAuxiliar = mapToResponseDto(turno);
+                turnosDevolver.add(turnoAuxiliar);
+            }
+            LOGGER.info("Se retorna todos los turnos: " + turnosDevolver);
+            return turnosDevolver;
+        } else {
+            throw new ResourceNotFoundException("{\"message\": \"no existen turnos\"}");
+        }
+    }
+
+    @Override
+    public TurnoResponseDto registrarTurno(TurnoRequestDto turnoRequestDto) throws BadRequestException, ResourceNotFoundException {
         //Buscamos el paciente y odontologo correspondientes
         Optional<Paciente> paciente = pacienteService.buscarPorId(turnoRequestDto.getPaciente_id());
         Optional<Odontologo> odontologo = odontologoService.buscarPorId(turnoRequestDto.getOdontologo_id());
@@ -56,7 +87,6 @@ public class TurnoService implements ITurnoService {
             turnoRegistrar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             turnoGuardado = turnoRepository.save(turnoRegistrar);
             LOGGER.info("Se guarda el turno");
-            //LOGGER.info("Se guarda el turno: " + turnoGuardado);
 
             //Armamos el turno a devolver
             turnoDevolver = mapToResponseDto(turnoGuardado);
@@ -69,33 +99,7 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public TurnoResponseDto buscarPorId(Integer id) {
-        Optional<Turno> turnoOptional = turnoRepository.findById(id);
-        if (turnoOptional.isPresent()) {
-            Turno turnoEncontrado = turnoOptional.get();
-            TurnoResponseDto turnoDevolver = mapToResponseDto(turnoEncontrado);
-            LOGGER.info("Se retorna el turno encontrado: " + turnoDevolver);
-            return turnoDevolver;
-        }
-        LOGGER.info("No se encontro turnos con el id: " + id);
-        return null;
-    }
-
-    @Override
-    public List<TurnoResponseDto> buscarTodos() {
-        List<Turno> turnos = turnoRepository.findAll();
-        List<TurnoResponseDto> turnosDevolver = new ArrayList<>();
-        TurnoResponseDto turnoAuxiliar = null;
-        for (Turno turno : turnos) {
-            turnoAuxiliar = mapToResponseDto(turno);
-            turnosDevolver.add(turnoAuxiliar);
-        }
-        LOGGER.info("Se retorna todos los turnos: " + turnosDevolver);
-        return turnosDevolver;
-    }
-
-    @Override
-    public void actualizarTurno(Integer id, TurnoRequestDto turnoRequestDto) {
+    public void actualizarTurno(Integer id, TurnoRequestDto turnoRequestDto) throws ResourceNotFoundException, BadRequestException {
         //Buscamos el paciente y odontologo correspondientes
         Optional<Paciente> paciente = pacienteService.buscarPorId(turnoRequestDto.getPaciente_id());
         Optional<Odontologo> odontologo = odontologoService.buscarPorId(turnoRequestDto.getOdontologo_id());
@@ -112,6 +116,9 @@ public class TurnoService implements ITurnoService {
             turnoModificar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             LOGGER.info("Se actualiza la información del turno: " + turnoModificar);
             turnoRepository.save(turnoModificar);
+        } else {
+            LOGGER.info("Odontologo o paciente no encontrado: " + turnoRequestDto);
+            throw new BadRequestException("{\"message\": \"odontologo o paciente no encontrados\"}");
         }
     }
 
@@ -128,29 +135,37 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public List<TurnoResponseDto> buscarPorFechas(LocalDate startDate, LocalDate endDate) {
+    public List<TurnoResponseDto> buscarPorFechas(LocalDate startDate, LocalDate endDate) throws ResourceNotFoundException {
         List<Turno> listadoTurnos = turnoRepository.buscarTurnosPorFecha(startDate, endDate);
-        List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
-        TurnoResponseDto turnoAuxiliar = null;
-        for (Turno turno: listadoTurnos) {
-            turnoAuxiliar = mapToResponseDto(turno);
-            listadoRetornar.add(turnoAuxiliar);
+        if (!listadoTurnos.isEmpty()) {
+            List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
+            TurnoResponseDto turnoAuxiliar = null;
+            for (Turno turno: listadoTurnos) {
+                turnoAuxiliar = mapToResponseDto(turno);
+                listadoRetornar.add(turnoAuxiliar);
+            }
+            LOGGER.info("Se retorna los turnos buscado por el rango de fechas: " + listadoRetornar);
+            return listadoRetornar;
+        } else {
+            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados\"}");
         }
-        LOGGER.info("Se retorna los turnos buscado por el rango de fechas: " + listadoRetornar);
-        return listadoRetornar;
     }
 
     @Override
-    public List<TurnoResponseDto> buscarMayorFechaActual() {
+    public List<TurnoResponseDto> buscarMayorFechaActual() throws ResourceNotFoundException {
         List<Turno> listadoTurnos = turnoRepository.buscarTurnosMayoresFecha();
-        List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
-        TurnoResponseDto turnoAuxiliar = null;
-        for (Turno turno: listadoTurnos) {
-            turnoAuxiliar = mapToResponseDto(turno);
-            listadoRetornar.add(turnoAuxiliar);
+        if (!listadoTurnos.isEmpty()) {
+            List<TurnoResponseDto> listadoRetornar = new ArrayList<>();
+            TurnoResponseDto turnoAuxiliar = null;
+            for (Turno turno: listadoTurnos) {
+                turnoAuxiliar = mapToResponseDto(turno);
+                listadoRetornar.add(turnoAuxiliar);
+            }
+            LOGGER.info("Se retorna los turnos con fecha mayor a la actual: " + listadoRetornar);
+            return listadoRetornar;
+        } else {
+            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados\"}");
         }
-        LOGGER.info("Se retorna los turnos con fecha mayor a la actual: " + listadoRetornar);
-        return listadoRetornar;
     }
 
     private TurnoResponseDto mapToResponseDto(Turno turno) {

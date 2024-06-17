@@ -1,6 +1,7 @@
 package dh.backend.clinicamvc.service.impl;
 
 import dh.backend.clinicamvc.entity.Paciente;
+import dh.backend.clinicamvc.exception.BadRequestException;
 import dh.backend.clinicamvc.exception.ResourceNotFoundException;
 import dh.backend.clinicamvc.repository.IPacienteRepository;
 import dh.backend.clinicamvc.service.IPacienteService;
@@ -21,19 +22,33 @@ public class PacienteService implements IPacienteService {
         this.pacienteRepository = pacienteRepository;
     }
 
-    public Paciente registrarPaciente(Paciente paciente) {
-        LOGGER.info("Se crea el paciente: " + paciente);
-        return pacienteRepository.save(paciente);
-    }
-
-    public Optional<Paciente> buscarPorId(Integer id) {
+    public Optional<Paciente> buscarPorId(Integer id) throws ResourceNotFoundException {
         LOGGER.info("Se busca el paciente por id: " + id);
-        return pacienteRepository.findById(id);
+        Optional<Paciente> pacienteOptional = pacienteRepository.findById(id);
+        if (!pacienteOptional.isPresent()) {
+            throw new ResourceNotFoundException("{\"message\": \"paciente no encontrado\"}");
+        }
+        return pacienteOptional;
     }
 
-    public List<Paciente> buscarTodos() {
+    public List<Paciente> buscarTodos() throws ResourceNotFoundException {
         LOGGER.info("Se bucan todos los pacientes");
+        List<Paciente> pacientes = pacienteRepository.findAll();
+        if (pacientes.isEmpty()) {
+            throw new ResourceNotFoundException("{\"message\": \"no existen pacientes\"}");
+        }
         return pacienteRepository.findAll();
+    }
+
+    public Paciente registrarPaciente(Paciente paciente) throws BadRequestException {
+        Paciente pacienteRegistrar = pacienteRepository.save(paciente);
+        if (paciente != null) {
+            LOGGER.info("Se crea el paciente: " + paciente);
+            return pacienteRegistrar;
+        } else {
+            throw new BadRequestException("{\"message\": \"Error al crear paciente, revise los datos enviados\"}");
+        }
+
     }
 
     @Override
@@ -62,14 +77,23 @@ public class PacienteService implements IPacienteService {
     }
 
     @Override
-    public Paciente buscarPorDNI(String dni) {
+    public Paciente buscarPorDNI(String dni) throws ResourceNotFoundException {
         LOGGER.info("Se busca paciente por DNI: " + dni);
-        return pacienteRepository.buscarPorDNI(dni);
+        Paciente paciente = pacienteRepository.buscarPorDNI(dni);
+        if (paciente == null) {
+            LOGGER.info("Paciente no encontrado");
+            throw new ResourceNotFoundException("{\"message\": \"paciente no encontrado\"}");
+        }
+        return paciente;
     }
 
     @Override
-    public List<Paciente> buscarPorProvincia(String provincia) {
+    public List<Paciente> buscarPorProvincia(String provincia) throws ResourceNotFoundException {
         LOGGER.info("Se busca paciente por provincia: " + provincia);
-        return pacienteRepository.buscarPacientesProvincia(provincia);
+        List<Paciente> pacientes = pacienteRepository.buscarPacientesProvincia(provincia);
+        if (pacientes.isEmpty()){
+            throw new ResourceNotFoundException("{\"message\": \"pacientes no encontrados\"}");
+        }
+        return pacientes;
     }
 }
