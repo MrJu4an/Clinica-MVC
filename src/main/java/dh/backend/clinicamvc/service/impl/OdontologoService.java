@@ -35,6 +35,7 @@ public class OdontologoService implements IOdontologoService {
         LOGGER.info("Se busca todos los odontologos");
         List<Odontologo> odontologos = odontologoRepository.findAll();
         if (odontologos.isEmpty()) {
+            LOGGER.info("No existen odontologos");
             throw new ResourceNotFoundException("{\"message\": \"no existen odontologos\"}");
         }
         return odontologos;
@@ -46,6 +47,7 @@ public class OdontologoService implements IOdontologoService {
             LOGGER.info("Se registra el odontologo: " + odontologo);
             return odontologoRegistrar;
         } else {
+            LOGGER.info("Error al crear el odontologo: " + odontologo);
             throw new BadRequestException("{\"message\": \"Error al crear odontologo, revise los datos enviados\"}");
         }
 

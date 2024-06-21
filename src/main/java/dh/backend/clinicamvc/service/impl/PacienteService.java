@@ -23,20 +23,22 @@ public class PacienteService implements IPacienteService {
     }
 
     public Optional<Paciente> buscarPorId(Integer id) throws ResourceNotFoundException {
-        LOGGER.info("Se busca el paciente por id: " + id);
         Optional<Paciente> pacienteOptional = pacienteRepository.findById(id);
         if (!pacienteOptional.isPresent()) {
+            LOGGER.info("No existe el paciente con el id: " + id);
             throw new ResourceNotFoundException("{\"message\": \"paciente no encontrado\"}");
         }
+        LOGGER.info("Se encuentra el paciente por id: " + id);
         return pacienteOptional;
     }
 
     public List<Paciente> buscarTodos() throws ResourceNotFoundException {
-        LOGGER.info("Se bucan todos los pacientes");
         List<Paciente> pacientes = pacienteRepository.findAll();
         if (pacientes.isEmpty()) {
+            LOGGER.info("No existen pacientes");
             throw new ResourceNotFoundException("{\"message\": \"no existen pacientes\"}");
         }
+        LOGGER.info("Se encuentran todos los pacientes");
         return pacienteRepository.findAll();
     }
 
@@ -46,6 +48,7 @@ public class PacienteService implements IPacienteService {
             LOGGER.info("Se crea el paciente: " + paciente);
             return pacienteRegistrar;
         } else {
+            LOGGER.info("Error al crear el paciente: " + paciente);
             throw new BadRequestException("{\"message\": \"Error al crear paciente, revise los datos enviados\"}");
         }
 
@@ -92,6 +95,7 @@ public class PacienteService implements IPacienteService {
         LOGGER.info("Se busca paciente por provincia: " + provincia);
         List<Paciente> pacientes = pacienteRepository.buscarPacientesProvincia(provincia);
         if (pacientes.isEmpty()){
+            LOGGER.info("No se encuentran pacientes con la provincia: " + provincia);
             throw new ResourceNotFoundException("{\"message\": \"pacientes no encontrados\"}");
         }
         return pacientes;

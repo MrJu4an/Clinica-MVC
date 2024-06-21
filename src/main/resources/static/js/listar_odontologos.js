@@ -19,8 +19,8 @@ const fetchOdontologos = () => {
                 <td>${odontologo.apellido}</td>
                 <td>${odontologo.idMatricula}</td>
                 <td>
-                  <button class="btn btn-primary btn-sm" onclick="editOdontologo(${odontologo.id}, '${odontologo.nombre}', '${odontologo.apellido}', '${odontologo.idMatricula}')" data-bs-toggle="modal" data-bs-target="#actualizarOdontologoModal" data-bs-whatever="@mdo">Modificar</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteOdontologo(${odontologo.id})">Eliminar</button>
+                  <button class="btn btn-primary" onclick="editOdontologo(${odontologo.id}, '${odontologo.nombre}', '${odontologo.apellido}', '${odontologo.idMatricula}')" data-bs-toggle="modal" data-bs-target="#actualizarOdontologoModal" data-bs-whatever="@mdo"><i class='bx bx-edit-alt'></i></button>
+                  <button class="btn btn-danger" onclick="deleteOdontologo(${odontologo.id})"><i class='bx bx-trash'></i></button>
                 </td>
               `;
 

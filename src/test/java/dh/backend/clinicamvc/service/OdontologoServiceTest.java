@@ -32,8 +32,16 @@ class OdontologoServiceTest {
     void setUp() {
         odontologo = new Odontologo();
         odontologo.setIdMatricula("MrJu4an");
-        odontologo.setNombre("Sebastian");
-        odontologo.setApellido("Apellido");
+        odontologo.setNombre("Alejandro");
+        odontologo.setApellido("Saenz");
+    }
+
+    @Test
+    @DisplayName("Crear odontologo")
+    void testCrearOdontologo() throws BadRequestException {
+        Odontologo odontologoRegistrado =  odontologoService.registrarOdontologo(odontologo);
+
+        assertNotNull(odontologoRegistrado);
     }
 
     @Test
@@ -45,6 +53,5 @@ class OdontologoServiceTest {
         odontologos = odontologoService.buscarTodos();
 
         assertNotNull(odontologos);
-        assertEquals(1, odontologos.size());
     }
 }

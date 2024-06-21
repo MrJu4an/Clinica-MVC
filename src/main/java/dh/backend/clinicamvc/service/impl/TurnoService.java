@@ -65,6 +65,7 @@ public class TurnoService implements ITurnoService {
             LOGGER.info("Se retorna todos los turnos: " + turnosDevolver);
             return turnosDevolver;
         } else {
+            LOGGER.info("No existen turnos");
             throw new ResourceNotFoundException("{\"message\": \"no existen turnos\"}");
         }
     }
@@ -129,6 +130,7 @@ public class TurnoService implements ITurnoService {
             LOGGER.info("Se elimina el turno con id: " + id);
             turnoRepository.deleteById(id);
         } else {
+            LOGGER.info("No se encuentra el turno con id: " + id);
             throw new ResourceNotFoundException("{\"message\": \"turno no encontrado\"}");
         }
 
@@ -147,7 +149,8 @@ public class TurnoService implements ITurnoService {
             LOGGER.info("Se retorna los turnos buscado por el rango de fechas: " + listadoRetornar);
             return listadoRetornar;
         } else {
-            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados\"}");
+            LOGGER.info("No se encuentran turnos en el rango de fechas");
+            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados por el rango de fechas\"}");
         }
     }
 
@@ -164,7 +167,8 @@ public class TurnoService implements ITurnoService {
             LOGGER.info("Se retorna los turnos con fecha mayor a la actual: " + listadoRetornar);
             return listadoRetornar;
         } else {
-            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados\"}");
+            LOGGER.info("No se encuentran turnos mayores a la fecha actual");
+            throw new ResourceNotFoundException("{\"message\": \"turnos no encontrados mayores a la fecha actual\"}");
         }
     }
 
